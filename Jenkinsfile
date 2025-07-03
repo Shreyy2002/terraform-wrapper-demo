@@ -8,7 +8,7 @@ pipeline {
   stages {
     stage('Init') {
       steps {
-        withCredentials([usernamePassword(credentialsId: 'aws-demo-creds', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+        withCredentials([usernamePassword(credentialsId: 'aws-keys', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
           sh 'chmod +x scripts/terraform-wrapper.sh'
           sh './scripts/terraform-wrapper.sh init'
         }
@@ -17,7 +17,7 @@ pipeline {
 
     stage('Validate') {
       steps {
-        withCredentials([usernamePassword(credentialsId: 'aws-demo-creds', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+        withCredentials([usernamePassword(credentialsId: 'aws-keys', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
           sh './scripts/terraform-wrapper.sh validate'
         }
       }
@@ -25,7 +25,7 @@ pipeline {
 
     stage('Plan') {
       steps {
-        withCredentials([usernamePassword(credentialsId: 'aws-demo-creds', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+        withCredentials([usernamePassword(credentialsId: 'aws-keys', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
           sh './scripts/terraform-wrapper.sh plan'
         }
       }
@@ -34,7 +34,7 @@ pipeline {
     stage('Apply') {
       when { branch 'main' }
       steps {
-        withCredentials([usernamePassword(credentialsId: 'aws-demo-creds', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+        withCredentials([usernamePassword(credentialsId: 'aws-keys', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
           sh './scripts/terraform-wrapper.sh apply'
         }
       }
@@ -43,7 +43,7 @@ pipeline {
     stage('Destroy') {
       when { branch 'cleanup' }
       steps {
-        withCredentials([usernamePassword(credentialsId: 'aws-demo-creds', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+        withCredentials([usernamePassword(credentialsId: 'aws-keys', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
           sh './scripts/terraform-wrapper.sh destroy'
         }
       }
@@ -52,10 +52,10 @@ pipeline {
 
   post {
     success {
-      echo "✅ Pipeline complete!"
+      echo "✅ Terraform pipeline completed successfully!"
     }
     failure {
-      echo "❌ Pipeline failed."
+      echo "❌ Terraform pipeline failed."
     }
   }
 }
