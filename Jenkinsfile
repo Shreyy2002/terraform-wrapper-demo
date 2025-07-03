@@ -8,45 +8,51 @@ pipeline {
   stages {
     stage('Init') {
       steps {
-        sh 'chmod +x scripts/terraform-wrapper.sh'
-        sh './scripts/terraform-wrapper.sh init'
+        withCredentials([usernamePassword(credentialsId: 'aws-demo-creds', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+          sh 'chmod +x scripts/terraform-wrapper.sh'
+          sh './scripts/terraform-wrapper.sh init'
+        }
       }
     }
 
     stage('Validate') {
       steps {
-        sh './scripts/terraform-wrapper.sh validate'
+        withCredentials([usernamePassword(credentialsId: 'aws-demo-creds', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+          sh './scripts/terraform-wrapper.sh validate'
+        }
       }
     }
 
     stage('Plan') {
       steps {
-        sh './scripts/terraform-wrapper.sh plan'
+        withCredentials([usernamePassword(credentialsId: 'aws-demo-creds', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+          sh './scripts/terraform-wrapper.sh plan'
+        }
       }
     }
 
     stage('Apply') {
-      when {
-        branch 'main'
-      }
+      when { branch 'main' }
       steps {
-        sh './scripts/terraform-wrapper.sh apply'
+        withCredentials([usernamePassword(credentialsId: 'aws-demo-creds', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+          sh './scripts/terraform-wrapper.sh apply'
+        }
       }
     }
 
     stage('Destroy') {
-      when {
-        branch 'cleanup'
-      }
+      when { branch 'cleanup' }
       steps {
-        sh './scripts/terraform-wrapper.sh destroy'
+        withCredentials([usernamePassword(credentialsId: 'aws-demo-creds', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+          sh './scripts/terraform-wrapper.sh destroy'
+        }
       }
     }
   }
 
   post {
     success {
-      echo "✅ Terraform wrapper pipeline completed."
+      echo "✅ Pipeline complete!"
     }
     failure {
       echo "❌ Pipeline failed."
