@@ -1,6 +1,10 @@
 pipeline {
   agent any
 
+  parameters {
+    booleanParam(name: 'DESTROY_INFRA', defaultValue: false, description: 'Check to destroy infrastructure')
+  }
+
   environment {
     TF_IN_AUTOMATION = 'true'
   }
@@ -55,11 +59,10 @@ pipeline {
 
     stage('Destroy') {
       when {
-        expression {
-          env.BRANCH_NAME == 'cleanup' || env.GIT_BRANCH == 'cleanup' || env.GIT_BRANCH == 'origin/cleanup'
-        }
+        expression { params.DESTROY_INFRA }
       }
       steps {
+        input message: "Are you sure you want to destroy the infrastructure?"
         withCredentials([usernamePassword(credentialsId: 'aws-keys', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
           sh './scripts/terraform-wrapper.sh destroy'
         }
