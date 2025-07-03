@@ -6,6 +6,15 @@ pipeline {
   }
 
   stages {
+    stage('Debug Branch') {
+      steps {
+        script {
+          echo "Detected BRANCH_NAME: ${env.BRANCH_NAME}"
+          echo "Detected GIT_BRANCH: ${env.GIT_BRANCH}"
+        }
+      }
+    }
+
     stage('Init') {
       steps {
         withCredentials([usernamePassword(credentialsId: 'aws-keys', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
@@ -32,7 +41,11 @@ pipeline {
     }
 
     stage('Apply') {
-      when { branch 'main' }
+      when {
+        expression {
+          env.BRANCH_NAME == 'main' || env.GIT_BRANCH == 'main' || env.GIT_BRANCH == 'origin/main'
+        }
+      }
       steps {
         withCredentials([usernamePassword(credentialsId: 'aws-keys', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
           sh './scripts/terraform-wrapper.sh apply'
@@ -41,7 +54,11 @@ pipeline {
     }
 
     stage('Destroy') {
-      when { branch 'cleanup' }
+      when {
+        expression {
+          env.BRANCH_NAME == 'cleanup' || env.GIT_BRANCH == 'cleanup' || env.GIT_BRANCH == 'origin/cleanup'
+        }
+      }
       steps {
         withCredentials([usernamePassword(credentialsId: 'aws-keys', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
           sh './scripts/terraform-wrapper.sh destroy'
