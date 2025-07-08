@@ -1,4 +1,5 @@
 @Library('shared-libraryy') _
+import org.cloudninja.Wrapper 
 
 def tf = new Wrapper(this)
 
