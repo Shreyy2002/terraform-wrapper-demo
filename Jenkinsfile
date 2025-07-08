@@ -1,5 +1,5 @@
 @Library('shared-libraryy') _
-import org.cloudninja.Wrapper  
+import org.cloudninja.Wrapper
 
 def tf = new Wrapper(this)
 
@@ -21,58 +21,22 @@ pipeline {
             }
         }
 
-        stage('Init') {
+        stage('Terraform Actions') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'aws-keys', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
                     script {
                         tf.init()
-                    }
-                }
-            }
-        }
-
-        stage('Validate') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'aws-keys', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
-                    script {
                         tf.validate()
-                    }
-                }
-            }
-        }
-
-        stage('Plan') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'aws-keys', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
-                    script {
                         tf.plan()
-                    }
-                }
-            }
-        }
 
-        stage('Apply') {
-            when {
-                expression { env.BRANCH_NAME == 'main' || env.GIT_BRANCH == 'main' || env.GIT_BRANCH == 'origin/main' }
-            }
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'aws-keys', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
-                    script {
-                        tf.apply()
-                    }
-                }
-            }
-        }
+                        if (env.BRANCH_NAME == 'main' || env.GIT_BRANCH == 'main' || env.GIT_BRANCH == 'origin/main') {
+                            tf.apply()
+                        }
 
-        stage('Destroy') {
-            when {
-                expression { params.DESTROY_INFRA }
-            }
-            steps {
-                input message: "Are you sure you want to destroy the infrastructure?"
-                withCredentials([usernamePassword(credentialsId: 'aws-keys', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
-                    script {
-                        tf.destroy()
+                        if (params.DESTROY_INFRA) {
+                            input message: "Are you sure you want to destroy the infrastructure?"
+                            tf.destroy()
+                        }
                     }
                 }
             }
